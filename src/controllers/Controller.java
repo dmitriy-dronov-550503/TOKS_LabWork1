@@ -3,7 +3,9 @@ package controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import sample.SerialConnect;
 
@@ -28,7 +30,7 @@ public class Controller {
     private ChoiceBox portChoice;
     private Button connectButton;
     private Button sendButton;
-    private VBox workingArea = new VBox();
+    private AnchorPane workingArea = new AnchorPane();
     private GridPane controlArea = new GridPane();
 
     public TextField getTextOut() {
@@ -128,7 +130,7 @@ public class Controller {
         }
     }
 
-    public VBox getWorkingArea() {
+    public AnchorPane getWorkingArea() {
         return workingArea;
     }
 

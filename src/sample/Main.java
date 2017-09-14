@@ -20,7 +20,7 @@ import java.util.Optional;
 public class Main extends Application {
 
     Controller controller = new Controller();
-    VBox workingArea = controller.getWorkingArea();
+    AnchorPane workingArea = controller.getWorkingArea();
     GridPane controlArea = controller.getControlArea();
     Scene scene;
 
@@ -38,7 +38,6 @@ public class Main extends Application {
         root.setLeft(controlArea);
 
         initWorkingArea();
-        VBox.setVgrow(workingArea, Priority.ALWAYS);
         root.setCenter(workingArea);
 
         scene = new Scene(root, 640, 480);
@@ -59,11 +58,17 @@ public class Main extends Application {
 
     public void initWorkingArea(){
         workingArea.setMaxHeight(1000);
-        TextField textOut = controller.getTextOut();
         TextArea textIn = controller.getTextIn();
+        AnchorPane.setTopAnchor(textIn, 0.0);
+        AnchorPane.setBottomAnchor(textIn, 70.0);
+        TextField textOut = controller.getTextOut();
+        AnchorPane.setBottomAnchor(textOut, 35.0);
+        AnchorPane.setRightAnchor(textOut, 0.0);
+        AnchorPane.setLeftAnchor(textOut, 0.0);
         HBox buttonsBox = new HBox();
         Button sendButton = controller.getSendButton();
         buttonsBox.getChildren().addAll(sendButton);
+        AnchorPane.setBottomAnchor(buttonsBox, 0.0);
         workingArea.getChildren().addAll(textIn, textOut, buttonsBox);
     }
 
