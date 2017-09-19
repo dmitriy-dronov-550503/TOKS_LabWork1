@@ -1,21 +1,22 @@
 package controllers;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import sample.SerialConnect;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Controller {
 
     private static SerialConnect serialConnect = new SerialConnect();
     private static TextField textOut = new TextField();
+    private TextArea textIn = new TextArea();
 
     private String baudrates[] = {"110", "300", "600", "1200", "4800",
             "9600", "19200", "38400", "57600", "115200", "128000", "256000"};
@@ -28,6 +29,10 @@ public class Controller {
     private ChoiceBox parityChoice;
     private String ports[] = {"/dev/ttys001", "/dev/ttys002"}; // /dev/tty.SLAB_USBtoUART
     private ChoiceBox portChoice;
+    private LinkedList<String> sentMessageList = new LinkedList<>();
+    private ChoiceBox sentMessageChoice;
+    private Hyperlink clearTextInLink = new Hyperlink("✖");
+    private Hyperlink refreshPortChoiceLink = new Hyperlink("↺");
     private Button connectButton;
     private Button sendButton;
     private AnchorPane workingArea = new AnchorPane();
@@ -37,10 +42,35 @@ public class Controller {
         return textOut;
     }
 
+
+
     public TextArea getTextIn() {
-        return serialConnect.getTextIn();
+       textIn.textProperty().bindBidirectional(serialConnect.getTextIn());
+       return textIn;
     }
 
+    public Hyperlink getClearTextInLink() {
+        clearTextInLink.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                textIn.clear();
+            }
+        });
+        clearTextInLink.setStyle("-fx-underline: false;");
+        return clearTextInLink;
+    }
+
+    public Hyperlink getRefreshPortChoiceLink() {
+        refreshPortChoiceLink.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                addPortsToPortChoice();
+                portChoice.getSelectionModel().select(0);
+            }
+        });
+        refreshPortChoiceLink.setStyle("-fx-underline: false;");
+        return refreshPortChoiceLink;
+    }
 
     public ChoiceBox getBaudrateChoice() {
         baudrateChoice = new ChoiceBox(FXCollections.observableArrayList(baudrates));
@@ -71,10 +101,27 @@ public class Controller {
     }
 
     public ChoiceBox getPortChoice() {
+        portChoice = new ChoiceBox();
+        addPortsToPortChoice();
+        return portChoice;
+    }
+
+    private void addPortsToPortChoice() {
         ObservableList portList = FXCollections.observableArrayList(ports);
         portList.addAll(serialConnect.getPortNames());
-        portChoice = new ChoiceBox(portList);
-        return portChoice;
+        portChoice.setItems(portList);
+    }
+
+    public ChoiceBox getSentMessageChoice() {
+        sentMessageChoice = new ChoiceBox(FXCollections.observableArrayList());
+        sentMessageChoice.setOnAction(t -> chooseSentMessage());
+        return sentMessageChoice;
+    }
+
+    private void chooseSentMessage() {
+        if(sentMessageChoice.isShowing()) {
+            textOut.setText(sentMessageChoice.getValue().toString());
+        }
     }
 
     public Button getConnectButton() {
@@ -122,8 +169,12 @@ public class Controller {
     }
 
     private void sendMessage() {
+        if(textOut.getText().isEmpty()) return;
         try {
-            serialConnect.getSerialPort().writeString(textOut.getText());
+            serialConnect.writeString(textOut.getText());
+            sentMessageList.addFirst(textOut.getText());
+            sentMessageChoice.getItems().clear();
+            sentMessageChoice.getItems().addAll(sentMessageList);
             textOut.clear();
         } catch (Exception ex) {
             alert("Port not connected");
@@ -138,7 +189,7 @@ public class Controller {
         return controlArea;
     }
 
-    private void alert(String text) {
+    public static void alert(String text) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information Dialog");
         alert.setHeaderText(null);

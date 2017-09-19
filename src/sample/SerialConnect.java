@@ -1,17 +1,21 @@
 package sample;
 
 
+import controllers.Controller;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.TextField;
 import jssc.*;
 
 import javafx.scene.control.TextArea;
 
 import javax.sql.rowset.serial.SerialArray;
+import java.util.concurrent.TimeUnit;
 
 public class SerialConnect {
 
-    private static SerialPort serialPort;
-    private PortReader portReader = new PortReader();
+    protected static SerialPort serialPort;
+    protected PortReader portReader = new PortReader();
     private boolean isOpened = false;
 
     public boolean isPortConnected() {
@@ -22,9 +26,9 @@ public class SerialConnect {
         return serialPort;
     }
 
-    public TextArea getTextIn() {
-        return portReader.getTextIn();
-    }
+    public StringProperty getTextIn() { return portReader.getTextIn(); }
+
+    public String getTextInString() { return portReader.getTextIn().get(); }
 
     public void open(String portName, Integer baudrate, Integer databits, Integer stopbits, Integer parity) {
         try {
@@ -53,26 +57,41 @@ public class SerialConnect {
         }
     }
 
-    private static class PortReader implements SerialPortEventListener {
-        private static TextArea textIn = new TextArea();
+    public void writeString(String message) {
+        try {
+            serialPort.setRTS(true);
+            serialPort.writeBytes(message.getBytes());
+            TimeUnit.MILLISECONDS.sleep(100);
+            serialPort.setRTS(false);
+            serialPort.sendBreak(1);
+        } catch (InterruptedException ex) {
+            Controller.alert("TimeUnit exception\n" + ex.getMessage());
+        } catch (SerialPortException ex) {
+            Controller.alert("Port exception\n" + ex.getMessage());
+        }
+    }
 
-        public TextArea getTextIn() {
+    public String[] getPortNames() {
+        return SerialPortList.getPortNames();
+    }
+
+    private static class PortReader implements SerialPortEventListener {
+
+        private final StringProperty textIn = new SimpleStringProperty("");
+
+        public final StringProperty getTextIn() {
             return textIn;
         }
 
         public void serialEvent(SerialPortEvent event) {
             if (event.isRXCHAR() && event.getEventValue() > 0) {
                 try {
-                    textIn.appendText(serialPort.readString(event.getEventValue()));
+                    textIn.set(textIn.get()+serialPort.readString(event.getEventValue()));
                 } catch (SerialPortException ex) {
                     System.out.println(ex);
                 }
             }
         }
-    }
-
-    public String[] getPortNames(){
-        return SerialPortList.getPortNames();
     }
 
     protected void finalize() {

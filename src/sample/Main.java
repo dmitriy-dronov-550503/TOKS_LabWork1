@@ -40,7 +40,7 @@ public class Main extends Application {
         initWorkingArea();
         root.setCenter(workingArea);
 
-        scene = new Scene(root, 640, 480);
+        scene = new Scene(root, 450, 210);
         primaryStage.setTitle("Serial Port Connector");
         primaryStage.setScene(scene);
         primaryStage.sizeToScene();
@@ -59,17 +59,27 @@ public class Main extends Application {
     public void initWorkingArea(){
         workingArea.setMaxHeight(1000);
         TextArea textIn = controller.getTextIn();
-        AnchorPane.setTopAnchor(textIn, 0.0);
-        AnchorPane.setBottomAnchor(textIn, 70.0);
+        textIn.setWrapText(true);
+        AnchorPane.setTopAnchor(textIn, 5.0);
+        AnchorPane.setBottomAnchor(textIn, 100.0);
+        AnchorPane.setRightAnchor(textIn, 10.0);
+        AnchorPane.setLeftAnchor(textIn, 0.0);
+        Hyperlink clearTextIn = controller.getClearTextInLink();
+        AnchorPane.setRightAnchor(clearTextIn, 12.0);
+        AnchorPane.setTopAnchor(clearTextIn, 7.0);
         TextField textOut = controller.getTextOut();
-        AnchorPane.setBottomAnchor(textOut, 35.0);
-        AnchorPane.setRightAnchor(textOut, 0.0);
+        AnchorPane.setBottomAnchor(textOut, 70.0);
+        AnchorPane.setRightAnchor(textOut, 10.0);
         AnchorPane.setLeftAnchor(textOut, 0.0);
+        ChoiceBox sentMessages = controller.getSentMessageChoice();
+        AnchorPane.setBottomAnchor(sentMessages, 40.0);
+        AnchorPane.setLeftAnchor(sentMessages, 0.0);
+        AnchorPane.setRightAnchor(sentMessages, 10.0);
         HBox buttonsBox = new HBox();
         Button sendButton = controller.getSendButton();
         buttonsBox.getChildren().addAll(sendButton);
-        AnchorPane.setBottomAnchor(buttonsBox, 0.0);
-        workingArea.getChildren().addAll(textIn, textOut, buttonsBox);
+        AnchorPane.setBottomAnchor(buttonsBox, 10.0);
+        workingArea.getChildren().addAll(textIn, clearTextIn, textOut, sentMessages, buttonsBox);
     }
 
     public void initControlArea(){
@@ -113,6 +123,9 @@ public class Main extends Application {
         controlArea.add(portLabel, 0, 4);
         controlArea.setMargin(portLabel, labelInsets);
         controlArea.add(portChoice, 1, 4);
+        Hyperlink refresh = controller.getRefreshPortChoiceLink();
+        controlArea.add(refresh, 2, 4);
+        controlArea.setMargin(refresh, choicesInsets);
         controlArea.setMargin(portChoice, choicesInsets);
 
         Button connectButton = controller.getConnectButton();
