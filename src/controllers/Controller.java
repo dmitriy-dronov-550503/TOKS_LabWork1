@@ -9,14 +9,18 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import sample.SerialConnect;
+import sample.SerialPackageConnect;
 
+import javax.xml.soap.Text;
 import java.util.*;
 
 public class Controller {
 
-    private static SerialConnect serialConnect = new SerialConnect();
+    private static SerialPackageConnect serialConnect = new SerialPackageConnect();
     private static TextField textOut = new TextField();
     private TextArea textIn = new TextArea();
+    private TextField addressField = new TextField();
+    private TextField destAddressField = new TextField();
 
     private String baudrates[] = {"110", "300", "600", "1200", "4800",
             "9600", "19200", "38400", "57600", "115200", "128000", "256000"};
@@ -42,11 +46,17 @@ public class Controller {
         return textOut;
     }
 
-
-
     public TextArea getTextIn() {
-       textIn.textProperty().bindBidirectional(serialConnect.getTextIn());
-       return textIn;
+        textIn.textProperty().bindBidirectional(serialConnect.getTextIn());
+        return textIn;
+    }
+
+    public TextField getAddressField() {
+        return addressField;
+    }
+
+    public TextField getDestAddressField() {
+        return destAddressField;
     }
 
     public Hyperlink getClearTextInLink() {
@@ -119,7 +129,7 @@ public class Controller {
     }
 
     private void chooseSentMessage() {
-        if(sentMessageChoice.isShowing()) {
+        if (sentMessageChoice.isShowing()) {
             textOut.setText(sentMessageChoice.getValue().toString());
         }
     }
@@ -136,21 +146,22 @@ public class Controller {
         } else {
             try {
                 connectSerialPort();
-            } catch (Exception ex){
+                serialConnect.setAddress(Integer.parseInt(addressField.getText()));
+            } catch (Exception ex) {
                 alert(ex.getMessage());
             }
         }
     }
 
     private void connectSerialPort() {
-            serialConnect.open(portChoice.getValue().toString(),
-                    Integer.parseInt(baudrateChoice.getValue().toString()),
-                    Integer.parseInt(databitsChoice.getValue().toString()),
-                    stopbits.get(stopbitsChoice.getValue()),
-                    parity.get(parityChoice.getValue()));
-            sendButton.setDefaultButton(true);
-            connectButton.setDefaultButton(false);
-            connectButton.setText("Disconnect");
+        serialConnect.open(portChoice.getValue().toString(),
+                Integer.parseInt(baudrateChoice.getValue().toString()),
+                Integer.parseInt(databitsChoice.getValue().toString()),
+                stopbits.get(stopbitsChoice.getValue()),
+                parity.get(parityChoice.getValue()));
+        sendButton.setDefaultButton(true);
+        connectButton.setDefaultButton(false);
+        connectButton.setText("Disconnect");
     }
 
     public void disconnectSerialPort() {
@@ -169,14 +180,15 @@ public class Controller {
     }
 
     private void sendMessage() {
-        if(textOut.getText().isEmpty()) return;
+        if (textOut.getText().isEmpty()) return;
         try {
-            serialConnect.writeString(textOut.getText());
+            serialConnect.writeString(textOut.getText(), Integer.parseInt(destAddressField.getText()));
             sentMessageList.addFirst(textOut.getText());
             sentMessageChoice.getItems().clear();
             sentMessageChoice.getItems().addAll(sentMessageList);
             textOut.clear();
         } catch (Exception ex) {
+            ex.printStackTrace();
             alert("Port not connected");
         }
     }

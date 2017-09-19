@@ -2,20 +2,15 @@ package sample;
 
 
 import controllers.Controller;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.TextField;
 import jssc.*;
 
-import javafx.scene.control.TextArea;
-
-import javax.sql.rowset.serial.SerialArray;
 import java.util.concurrent.TimeUnit;
 
 public class SerialConnect {
 
     protected static SerialPort serialPort;
-    protected PortReader portReader = new PortReader();
+    protected static PortReader portReader = new PortReader();
     private boolean isOpened = false;
 
     public boolean isPortConnected() {
@@ -37,6 +32,7 @@ public class SerialConnect {
             serialPort.setParams(baudrate, databits, stopbits, parity);
             serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |
                     SerialPort.FLOWCONTROL_RTSCTS_OUT);
+            portReader.setSerialPort(serialPort);
             serialPort.addEventListener(portReader, SerialPort.MASK_RXCHAR);
             isOpened = true;
         } catch (SerialPortException ex) {
@@ -73,25 +69,6 @@ public class SerialConnect {
 
     public String[] getPortNames() {
         return SerialPortList.getPortNames();
-    }
-
-    private static class PortReader implements SerialPortEventListener {
-
-        private final StringProperty textIn = new SimpleStringProperty("");
-
-        public final StringProperty getTextIn() {
-            return textIn;
-        }
-
-        public void serialEvent(SerialPortEvent event) {
-            if (event.isRXCHAR() && event.getEventValue() > 0) {
-                try {
-                    textIn.set(textIn.get()+serialPort.readString(event.getEventValue()));
-                } catch (SerialPortException ex) {
-                    System.out.println(ex);
-                }
-            }
-        }
     }
 
     protected void finalize() {

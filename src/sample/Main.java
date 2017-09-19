@@ -15,6 +15,8 @@ import javafx.stage.Stage;
 import jssc.*;
 import sun.awt.PlatformFont;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Main extends Application {
@@ -27,8 +29,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-        System.out.print(SerialPortList.getPortNames().length);
-
         BorderPane root = new BorderPane();
         BorderPane.setMargin(controlArea, new Insets(10, 10, 10, 10));
         //root.setPadding(new Insets(25, 25, 25, 25));
@@ -40,7 +40,7 @@ public class Main extends Application {
         initWorkingArea();
         root.setCenter(workingArea);
 
-        scene = new Scene(root, 450, 210);
+        scene = new Scene(root, 500, 300);
         primaryStage.setTitle("Serial Port Connector");
         primaryStage.setScene(scene);
         primaryStage.sizeToScene();
@@ -61,12 +61,22 @@ public class Main extends Application {
         TextArea textIn = controller.getTextIn();
         textIn.setWrapText(true);
         AnchorPane.setTopAnchor(textIn, 5.0);
-        AnchorPane.setBottomAnchor(textIn, 100.0);
+        AnchorPane.setBottomAnchor(textIn, 130.0);
         AnchorPane.setRightAnchor(textIn, 10.0);
         AnchorPane.setLeftAnchor(textIn, 0.0);
         Hyperlink clearTextIn = controller.getClearTextInLink();
         AnchorPane.setRightAnchor(clearTextIn, 12.0);
         AnchorPane.setTopAnchor(clearTextIn, 7.0);
+
+        Label daLabel = new Label("To address:");
+        AnchorPane.setBottomAnchor(daLabel, 106.0);
+        AnchorPane.setRightAnchor(daLabel, 10.0);
+        AnchorPane.setLeftAnchor(daLabel, 0.0);
+        TextField daField = controller.getDestAddressField();
+        AnchorPane.setBottomAnchor(daField, 100.0);
+        AnchorPane.setRightAnchor(daField, 10.0);
+        AnchorPane.setLeftAnchor(daField, 80.0);
+
         TextField textOut = controller.getTextOut();
         AnchorPane.setBottomAnchor(textOut, 70.0);
         AnchorPane.setRightAnchor(textOut, 10.0);
@@ -79,57 +89,65 @@ public class Main extends Application {
         Button sendButton = controller.getSendButton();
         buttonsBox.getChildren().addAll(sendButton);
         AnchorPane.setBottomAnchor(buttonsBox, 10.0);
-        workingArea.getChildren().addAll(textIn, clearTextIn, textOut, sentMessages, buttonsBox);
+        workingArea.getChildren().addAll(textIn, clearTextIn, daLabel, daField, textOut, sentMessages, buttonsBox);
     }
 
     public void initControlArea(){
         Insets labelInsets = new Insets(0,10,5,0);
         Insets choicesInsets = new Insets(0,0,5,0);
+
+        Label addressLabel = new Label("Address:");
+        TextField addressField = controller.getAddressField();
+        controlArea.add(addressLabel, 0,0);
+        controlArea.setMargin(addressLabel, labelInsets);
+        controlArea.add(addressField, 1, 0);
+        controlArea.setMargin(addressField, choicesInsets);
+
         Label baudrateLabel = new Label("Baudrate:");
         ChoiceBox baudrateChoice = controller.getBaudrateChoice();
         baudrateChoice.getSelectionModel().select(5);
-        controlArea.add(baudrateLabel, 0,0);
+        controlArea.add(baudrateLabel, 0,1);
         controlArea.setMargin(baudrateLabel, labelInsets);
-        controlArea.add(baudrateChoice, 1, 0);
+        controlArea.add(baudrateChoice, 1, 1);
         controlArea.setMargin(baudrateChoice, choicesInsets);
 
         Label databitsLabel = new Label("Databits:");
         ChoiceBox databitsChoice = controller.getDatabitsChoice();
         databitsChoice.getSelectionModel().select(0);
-        controlArea.add(databitsLabel, 0, 1);
+        controlArea.add(databitsLabel, 0, 2);
         controlArea.setMargin(databitsLabel, labelInsets);
-        controlArea.add(databitsChoice, 1, 1);
+        controlArea.add(databitsChoice, 1, 2);
         controlArea.setMargin(databitsChoice, choicesInsets);
 
         Label stopbitsLabel = new Label("Stopbits:");
         ChoiceBox stopbitsChoice = controller.getStopbitsChoice();
         stopbitsChoice.getSelectionModel().select(0);
-        controlArea.add(stopbitsLabel, 0, 2);
+        controlArea.add(stopbitsLabel, 0, 3);
         controlArea.setMargin(stopbitsLabel, labelInsets);
-        controlArea.add(stopbitsChoice, 1, 2);
+        controlArea.add(stopbitsChoice, 1, 3);
         controlArea.setMargin(stopbitsChoice, choicesInsets);
 
         Label parityLabel = new Label("Parity:");
         ChoiceBox parityChoice = controller.getParityChoice();
         parityChoice.getSelectionModel().select(0);
-        controlArea.add(parityLabel, 0, 3);
+        controlArea.add(parityLabel, 0, 4);
         controlArea.setMargin(parityLabel, labelInsets);
-        controlArea.add(parityChoice, 1, 3);
+        controlArea.add(parityChoice, 1, 4);
         controlArea.setMargin(parityChoice, choicesInsets);
 
         Label portLabel = new Label("Port:");
         ChoiceBox portChoice = controller.getPortChoice();
         portChoice.getSelectionModel().select(0);
-        controlArea.add(portLabel, 0, 4);
+        controlArea.add(portLabel, 0, 5);
         controlArea.setMargin(portLabel, labelInsets);
-        controlArea.add(portChoice, 1, 4);
+        controlArea.add(portChoice, 1, 5);
         Hyperlink refresh = controller.getRefreshPortChoiceLink();
-        controlArea.add(refresh, 2, 4);
+        controlArea.add(refresh, 2, 5);
         controlArea.setMargin(refresh, choicesInsets);
         controlArea.setMargin(portChoice, choicesInsets);
 
         Button connectButton = controller.getConnectButton();
         connectButton.setDefaultButton(true);
-        controlArea.add(connectButton, 1,5);
+        controlArea.add(connectButton, 1,6);
     }
 }
